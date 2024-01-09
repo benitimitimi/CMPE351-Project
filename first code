@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
+
+
+void fcfs(int, int[], int[], int[]);  
+
+void rr(int, int[], int[], int[], int);
+
+void srtf(int, int[], int[], int[]);
+
+void turn_around(int, int [], int []);
+
+void cpu_usage(int, int[], int);
+
+void copy_array(int, int[], int[]);
+
+int main(int argc, char *argv[])
+{
+  
+   int size = 0;
+  
+   int quantum;
+  
+   int pid[20], arrival_time[20], burst_time[20];
+  
+   FILE *file;
+   //Sets the file to read
+   file = fopen(argv[1], "r");
+  
+   if ((argc < 3) || (argc > 4))
+   {
+       printf("Usage: proj2 input_file FCFS|RR|SRJF [quantum]\n");
+   }
+   else
+   {
+       if (file)
+       {
+           while (!feof(file))
+           {
+               fscanf(file, "%d %d %d", &pid[size], &arrival_time[size], &burst_time[size]);
+               size += 1;
+           }
+       }
+  
+      
+       if(size == 0)
+       {
+           goto empty_queue;
+       }
+
+       printf("Schdeuling Algorithm: ");
+      
+       if (!strcmp(argv[2], "FCFS"))
+       {
+           printf("FCFS\n");
+           fcfs(size, pid, burst_time, arrival_time);  
+       }
+       else if (!strcmp(argv[2], "RR"))
+       {
+           if (argc == 4)
+           {
+               printf("RR\n");
+               quantum = atoi(argv[3]);
+               rr(size, pid, burst_time, arrival_time, quantum);
+           }
+           else
+           {
+               printf("...\n Invalid Entry\n");
+           }
+       }
+       else if (!strcmp(argv[2], "SRTF"))
+       {
+           printf("SRTF\n");
+           srtf(size, pid, burst_time, arrival_time);
+       }
+       else
+       {
+           printf("USAGE: FCFS, RR, SRTF\n");
+       }
+   }
+  
+   return 0;
+
+   empty_queue: printf("\nProcess queue is empty. End of run.\n");
+}
