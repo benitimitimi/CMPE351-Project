@@ -1,0 +1,87 @@
+//SRTF: To implement shortest run-time first
+void srtf(int size, int pid[], int burst_time[], int arrival_time[])
+{
+   int i, j, n, k, time, result;
+   int temp_burst[size], waiting[size], response_time[size];
+   int turnaround_time[size], wait_time[size];
+   float float_result;
+   bool done, processed[size];
+   //Duplicates burst_time array
+   copy_array(size, burst_time, temp_burst);
+  
+   printf("Total of %d tasks are read. Press 'enter' to start...", size);
+   getchar();
+   printf("===============\n");
+  
+   //Initializes all processed to false
+   for (i = 0; i < size; ++i)
+   {
+       processed[i] = false;
+   }
+   //Initializes the response time
+   for (i = 0; i < size; ++i)
+   {
+       response_time[i] = -1;
+   }
+   //Initializes the wait time
+   for (i = 0; i < size; ++i)
+   {
+       wait_time[i] = 0;
+   }
+  
+   //Shortest Runtime First
+   done = false;
+   time = 0;
+   while (!done)
+   {
+       n = 1000000;
+       k = -1;
+       for (i = 0; i < size; ++i)
+       {
+           if ((temp_burst[i] != 0) && (arrival_time[i] <= time))
+           {
+               if (temp_burst[i] < n)
+               {
+                   n = temp_burst[i];
+                   k = i;
+               }
+           }
+           else if ((temp_burst[i] == 0) && (processed[i] != true))
+           {
+               printf("<System Time\t%d> Process: %d\t...is finished;\n", time, pid[i]);
+               processed[i] = true;
+               turnaround_time[i] = time - arrival_time[i];
+           }
+       }
+       if (k != -1)
+       {
+           printf("<System Time\t%d> Process: %d\t...is running;\n", time, pid[k]);
+           temp_burst[k] -= 1;
+           if (response_time[k] == -1)
+           {
+               response_time[k] = time - arrival_time[k];
+           }
+       }
+       for (i = 0; i < size; ++i)
+       {
+           if ((temp_burst[i] != 0) && (arrival_time[i] <= time))
+           {
+               if (k != i)
+               {
+                   wait_time[i] += 1;
+               }
+           }
+       }
+       done = true;
+       for (i = 0; i < size; ++i)
+       {
+           if ( processed[i] != true)
+           {
+               done = false;
+               time += 1;
+               break;
+           }
+       }
+   }
+   printf("<System Time\t%d> ...All processes finished;\n", time);
+   printf("==================================================================\n");
