@@ -1,0 +1,212 @@
+ //CPU Usage
+   cpu_usage(size, burst_time, time);
+  
+   //Average Wait Time
+   result = 0;
+   for (i = 0; i < size; ++i)
+   {
+       result += wait_time[i];
+   }
+   float_result = 1.0 * ((float)result/(float)size);
+   printf("Average Wait Time\t: %.2f\n", float_result);
+  
+   //Average Response Time
+   result = 0;
+   for (i = 0; i < size; ++i)
+   {
+       result += response_time[i];
+   }
+   float_result = 1.0 * ((float)result/(float)size);
+   printf("Average Response Time\t: %.2f\n", float_result);
+  
+   //Average Turn Around Time
+   result = 0;
+   for (i = 0; i < size; ++i)
+   {
+       result += turnaround_time[i];
+   }
+   float_result = 1.0 * ((float)result/(float)size);
+   printf("Average Turn Around Time: %.2f\n", float_result);
+}
+
+
+void rr(int size, int pid[], int burst_time[], int arrival_time[], int quantum)
+{
+   int i, j, n, remain, count, front, rear, time, result;
+   int ready_queue[size], temp_burst[size], waiting[size], response_time[size];
+   int turnaround[size], waittime[size];
+   int flag = 0;
+   float float_result;
+   bool done, processed[size], waiting_queue[size];
+   
+   copy_array(size, burst_time, temp_burst);
+  
+   printf("Total of %d tasks are read. Press 'enter' to start...", size);
+   getchar();
+   printf("==================================================================\n");
+  
+  
+   for (i = 0; i < size; ++i)
+   {
+       processed[i] = false;
+   }
+   for (i = 0; i < size; ++i)
+   {
+       response_time[i] = -1;
+   }
+   
+   for (i = 0; i < size; ++i)
+   {
+       ready_queue[i] = -1;
+   }
+  
+   for (i = 0; i < size; ++i)
+   {
+       waiting_queue[i] = false;
+   }
+   
+   for (i = 0; i < size; ++i)
+   {
+       waittime[i] = 0;
+   }
+  
+ 
+   done = false;
+   n = 0;
+   time = 0;
+   front = 0;
+   rear = -1;
+   while (!done)
+   {
+       check_queue: for (i = 0; i < size; ++i)
+       {
+           if ((arrival_time[i] <= time) && (temp_burst != 0) && (processed[i] != true))
+           {
+               waiting_queue[i] = false;
+               for (j = 0; j < size; ++j)
+               {
+                   if (ready_queue[j] == i)
+                   {
+                       waiting_queue[i] = false;
+                       break;
+                   }
+                   else
+                   {
+                       waiting_queue[i] = true;
+                   }
+               }
+           }
+           if (waiting_queue[i] == true)
+           {
+               rear = (rear + 1) % size;
+               ready_queue[rear] = i;
+           }
+       }
+       if (temp_burst[ready_queue[front]] == 0)
+       {
+           printf("<System Time\t%d> Process: %d\t...is finished;\n", time, pid[ready_queue[front]]);
+           processed[ready_queue[front]] = true;
+           turnaround[ready_queue[front]] = time - arrival_time[ready_queue[front]];
+       }
+       if ((n >= quantum) || (processed[ready_queue[front]] == true))
+       {
+           ready_queue[front] = -1;
+           front = (front + 1) % size;
+           if (n == quantum)
+           {
+               n = 0;
+               goto check_queue;
+           }
+           n = 0;
+       }
+       if (ready_queue[front] != -1)
+       {
+           n += 1;
+           temp_burst[ready_queue[front]] -= 1;
+           if (response_time[ready_queue[front]] == -1)
+           {
+               response_time[ready_queue[front]] = time - arrival_time[ready_queue[front]];
+           }
+       }
+       if (ready_queue[front] != -1)
+       {
+           printf("<System Time\t%d> Process: %d\t...is running;\n", time, pid[ready_queue[front]]);
+       }
+       done = true;
+       for (i = 0; i < size; ++i)
+       {
+           if ((temp_burst[i] != 0) && (arrival_time[i] <= time))
+           {
+               if (ready_queue[front] != i)
+               {
+                   waittime[i] += 1;
+               }
+           }
+       }
+       for (i = 0; i < size; ++i)
+       {
+           if (processed[i] != true)
+           {
+               done = false;
+               time += 1;
+               break;
+           }
+       }
+   }
+   printf("<System Time\t%d> ...All processes finished;\n", time);
+   printf("==================================================================\n");
+  
+  
+   for (i = 0; i < size; ++i)
+   {
+       processed[i] = false;
+   }
+  
+  
+   cpu_usage(size, burst_time, time);
+  
+ 
+   copy_array(size, burst_time, temp_burst);
+  
+  
+   result = 0;
+   for (i = 0; i < size; ++i)
+   {
+       result += waittime[i];
+   }
+   float_result = 1.0 * ((float)result/(float)size);
+   printf("Average Waiting Time\t: %.2f\n", float_result);
+  
+   
+   result = 0;
+   for (i = 0; i < size; ++i)
+   {
+       result += response_time[i];
+   }
+   float_result = ((float)result/(float)size);
+   printf("Average Response Time\t: %.2f\n", float_result);
+  
+   
+   result = 0;
+   for (i = 0; i < size; ++i)
+   {
+       result += turnaround[i];
+   }
+   float_result = 1.0 * ((float)result/(float)size);
+   printf("Average Turn Around Time: %.2f\n", float_result);
+}
+
+
+void fcfs(int size, int pid[], int burst_time[], int arrival_time[])
+{
+   int i, j, k, n, time, result;
+   int temp_burst[size], first_response[size];
+   int wait_time[size], turnaround_time[size];
+   float float_result;
+   bool done, processed[size];
+   
+   copy_array(size, burst_time, temp_burst);
+  
+   printf("Total of %d tasks are read. Press 'enter' to start...", size);
+   getchar();
+   printf("==================================================================\n");
